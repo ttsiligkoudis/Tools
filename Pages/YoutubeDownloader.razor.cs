@@ -150,6 +150,7 @@ namespace ToolsServer.Pages
                     var ext = string.Empty;
                     var failureCount = 0;
                     var success = false;
+                    Exception lastException = null;
 
                     while (failureCount < 3 && !success)
                     {
@@ -158,13 +159,19 @@ namespace ToolsServer.Pages
                             (fileName, fileBytes, ext) = await GetVideoStreamData(count, video);
                             success = true;
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            lastException = ex;
                             failureCount++;
                         }
                     }
 
-                    if (fileBytes == null) continue;
+                    if (fileBytes == null)
+                    {
+                        if (videos.Count == 1)
+                            errorMessage = $"Failed to download '{video.Value}': {lastException?.Message}";
+                        continue;
+                    }
 
                     if (videos.Count > 1)
                     {
@@ -204,18 +211,28 @@ namespace ToolsServer.Pages
 
             var streamManifest = await Youtube.Videos.Streams.GetManifestAsync(video.Key);
 
-            if (selectedType == VideoType.Audio)
+            if (selectedType == VideoType.Audio || selectedType == VideoType.AudioMp3)
                 streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
             else if (selectedType == VideoType.Video)
                 streamInfo = streamManifest.GetVideoOnlyStreams().Where(s => s.Container == Container.Mp4).GetWithHighestVideoQuality();
-            else
-                streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate(); //streamInfo = streamManifest.GetMuxedStreams().GetWithHighestVideoQuality();
+            else if (selectedType == VideoType.VideoAndAudioQuick || selectedType == VideoType.VideoAndAudioHighestQuality)
+            {
+                var muxedStreams = streamManifest.GetMuxedStreams();
+                if (muxedStreams.Any())
+                    streamInfo = muxedStreams.GetWithHighestVideoQuality();
+            }
 
-            var ext = streamInfo.Container.Name;
             var fileName = $"{(videos.Count > 1 ? count + " - " : "")}{Regex.Replace(video.Value, @"[\\/:*?""<>|]", "_")}";
 
-            if (selectedType == VideoType.VideoAndAudioHighestQuality && !isPlaylist)
+            // Most videos no longer expose a combined video+audio (muxed) stream, so quick download
+            // falls back to the same ffmpeg merge path as "Highest Quality" when none is available.
+            var needsMerge = streamInfo == null &&
+                (selectedType == VideoType.VideoAndAudioQuick || (selectedType == VideoType.VideoAndAudioHighestQuality && !isPlaylist));
+
+            string ext;
+            if (needsMerge)
             {
+                ext = "mp4";
                 var filePath = $"{downloadsPath}{fileName}.{ext}";
                 if (File.Exists(filePath)) File.Delete(filePath);
                 await Youtube.Videos.DownloadAsync(video.Key, filePath);
@@ -224,6 +241,7 @@ namespace ToolsServer.Pages
             }
             else
             {
+                ext = streamInfo.Container.Name;
                 using var stream = await Youtube.Videos.Streams.GetAsync(streamInfo);
                 using var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);

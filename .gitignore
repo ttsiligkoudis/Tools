@@ -13,3 +13,7 @@ wwwroot/downloads/*
 ## OS
 .DS_Store
 Thumbs.db
+
+## Local secrets (real config values; appsettings.json holds the template)
+appsettings.Local.json
+/.agent-logs

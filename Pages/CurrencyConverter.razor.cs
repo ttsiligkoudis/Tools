@@ -20,6 +20,8 @@ namespace ToolsServer.Pages
         private string targetCurrency = "USD";
         [Inject]
         private HttpClient HttpClient { get; set; }
+        [Inject]
+        private IConfiguration Configuration { get; set; }
         private List<Currency> currencies { get; set; } = new();
         private List<HistoricalRates> historicalRatesList { get; set; } = new();
         public Dictionary<string, decimal> Rates { get; set; }
@@ -28,7 +30,7 @@ namespace ToolsServer.Pages
         private LineConfig chartConfig;
         private GraphTimePeriod timePeriod = GraphTimePeriod.Year;
         private string baseUrl = "http://api.currencylayer.com";
-        private string token = "?access_key=c6c00bbee25c5439311ece83b0967f43";
+        private string token => $"?access_key={Configuration["CurrencyLayer:AccessKey"]}";
 
         protected override async Task OnInitializedAsync()
         {
