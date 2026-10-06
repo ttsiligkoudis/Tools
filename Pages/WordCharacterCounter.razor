@@ -1,0 +1,31 @@
+﻿@page "/word-character-counter"
+
+<style>
+    .counter-container {
+        text-align: center;
+        margin: 20px;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    p {
+        font-size: 18px;
+        margin-top: 10px;
+    }
+</style>
+
+<h3 class="d-lg-none mb-4">Word/Character Counter</h3>
+
+<div class="counter-container">
+    <textarea rows="5" cols="50" @bind="inputText" @bind:event="oninput"></textarea>
+    <div>
+        <p><strong>Word Count:</strong> @WordCount</p>
+        <p><strong>Character Count:</strong> @CharacterCount</p>
+    </div>
+</div>

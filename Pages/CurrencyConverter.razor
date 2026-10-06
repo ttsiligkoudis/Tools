@@ -1,0 +1,69 @@
+﻿@page "/currency-converter"
+<h3 class="d-lg-none mb-4">Currency Converter</h3>
+
+@if (_render)
+{
+    <div class="container-fluid card shadow card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="sourceAmount" class="form-label">Amount</label>
+                    <input id="sourceAmount" class="form-control" type="number" value="@sourceAmount" @oninput="OnSourceRateChange" step="0.5" />
+                </div>
+                <div class="mb-3">
+                    <label for="sourceCurrency" class="form-label">Source Currency</label>
+                    <select id="sourceCurrency" class="form-select" @onchange="OnSourceCurrencyChange">
+                        @foreach (var symbol in currencies.Where(w => w.Code != targetCurrency))
+                        {
+                            <option selected="@(symbol.Code == sourceCurrency)" value="@symbol.Code">@($"{symbol.Description} ({symbol.Code})")</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="targetAmount" class="form-label">Converted Amount</label>
+                    <input id="targetAmount" class="form-control" type="number" value="@targetAmount" @oninput="OnTargetRateChange" step="0.5" />
+                </div>
+                <div class="mb-3">
+                    <label for="targetCurrency" class="form-label">Target Currency</label>
+                    <select id="targetCurrency" class="form-select" @onchange="OnTargetCurrencyChange">
+                        @foreach (var symbol in currencies.Where(w => w.Code != sourceCurrency))
+                        {
+                            <option selected="@(symbol.Code == targetCurrency)" value="@symbol.Code">@($"{symbol.Description} ({symbol.Code})")</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        @if (targetAmount != 0)
+        {
+            <div class="alert alert-success">
+                1 @sourceCurrency equals to @Rates.GetValueOrDefault(targetCurrency) @targetCurrency
+            </div>
+        }
+
+        <div class="mb-4 offset-lg-2 col-lg-8" style="display:@(isLoading ? "none" : "block")">
+            <div class="offset-sm-4 col-sm-4 btn-group d-flex justify-content-center">
+                @foreach (GraphTimePeriod period in Enum.GetValues(typeof(GraphTimePeriod)))
+                {
+                    <a class="btn btn-secondary btn-sm @(timePeriod == period ? "active" : "notActive")" @onclick="async () => { if(timePeriod != period) { timePeriod = period;  await ConfigGraph(); } }">@period</a>
+                }
+            </div>
+            <Chart Config="chartConfig"></Chart>
+        </div>
+
+    </div>
+}
+
+@if (isLoading)
+{
+    <div class="loader-overlay d-flex">
+        <div class="blur-background"></div>
+        <div class="loader spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}

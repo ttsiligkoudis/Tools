@@ -1,0 +1,113 @@
+﻿@page "/"
+
+<PageTitle>Online Tools</PageTitle>
+
+<header class="container mt-5">
+    <h1>Welcome to Our Online Tools Hub</h1>
+    <p class="lead">Discover a collection of powerful and user-friendly online utilities that simplify everyday tasks. Meet our AI assistant J.A.R.V.I.S. for intelligent help.</p>
+</header>
+
+<section class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">J.A.R.V.I.S. Assistant</h2>
+                    <p class="card-text">Conversational AI that can fetch Hacker News and more tools soon.</p>
+                    <a href="jarvis" class="btn btn-primary mt-auto">Chat Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">Word/Character Counter</h2>
+                    <p class="card-text">Paste any text and easily count Words and Characters.</p>
+                    <a href="word-character-counter" class="btn btn-primary mt-auto">Count Words/Characters</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">YouTube Downloader</h2>
+                    <p class="card-text">Download your favorite YouTube videos for offline viewing.</p>
+                    <a href="youtube-downloader" class="btn btn-primary mt-auto">Start Downloading</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">Image Resizer</h2>
+                    <p class="card-text">Upload and resize your best Images fast and easy.</p>
+                    <a href="image-resizer" class="btn btn-primary mt-auto">Resize Image</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">Currency Converter</h2>
+                    <p class="card-text">Convert any currency with the latest rates.</p>
+                    <a href="currency-converter" class="btn btn-primary mt-auto">Convert Currency</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">QR Code Generator</h2>
+                    <p class="card-text">Generate QR Codes easily for various purposes.</p>
+                    <a href="qr-code-generator" class="btn btn-primary mt-auto">Create QR Codes</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">File Transfer</h2>
+                    <p class="card-text">Upload and send multiple files via email.</p>
+                    <a href="file-transfer" class="btn btn-primary mt-auto">Send Files</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">Document Converter</h2>
+                    <p class="card-text">Convert documents to other types effortlessly.</p>
+                    <a href="document-converter" class="btn btn-primary mt-auto">Convert Documents</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h2 class="card-title">Weather</h2>
+                    <p class="card-text">Check current and upcoming weather forecast.</p>
+                    <a href="weather" class="btn btn-primary mt-auto">View Weather</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+@code {
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        Layout.Title = "Home";
+    }
+}

@@ -1,0 +1,132 @@
+﻿@page "/"
+@namespace ToolsServer.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "~/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha384-3Ck70y4s6/L8Wo3lOe9xrIofVzVN7/yoFgBf8b5jWqGOfmPw0hjk6iThJU5tbj6X" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script src="_content/ChartJs.Blazor.Fork/ChartJsBlazorInterop.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.12/signalr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+<script src="https://kit.fontawesome.com/5feecfa793.js" crossorigin="anonymous"></script>
+
+<script>
+    var files = [];
+
+    function getConnectionId() {
+        return connection.invoke("GetConnectionId");
+    }
+
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/fileHub")
+        .build();
+
+    connection.on("ReceiveFile", function (name, data) {
+        console.log('test');
+        var fileBytes = Uint8Array.from(atob(data), c => c.charCodeAt(0))
+        files.push({ name: name, data: fileBytes });
+    });
+
+    connection.start().catch(function (err) {
+        return console.error(err.toString());
+    });
+
+    function Download(url, fileName){
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    window.BlazorDownloadFileBlob = (data, contentType, fileName) => {
+        const blob = new Blob([data], { type: contentType });
+        const url = window.URL.createObjectURL(blob);
+        Download(url, fileName);
+    }
+
+    window.BlazorGenerateAndDownloadZip = (fileName) => {
+        var zip = new JSZip();
+        
+        files.forEach(file => {
+            zip.file(file.name, file.data)
+        });
+
+        files = [];
+
+        zip.generateAsync({ type: "blob" }).then(function (content) {
+            var url = URL.createObjectURL(content);
+            Download(url, fileName);
+        });
+    }
+
+    window.DownloadSharedFiles = (contentType) => {
+        files.forEach(file => {
+            var blob = new Blob([file.data], { type: contentType });
+            var url = URL.createObjectURL(blob);
+            Download(url, file.name);
+        });
+    }
+
+    window.clickById = function (id) {
+        var item = document.getElementById(id);
+        if (item) {
+            item.click();
+        }
+    }
+
+    window.UploadFileForm = function (token, host) {
+        var formData = new FormData(document.getElementById("uploadFileForm"));
+        var headers = new Headers();
+        headers.append("Authorization", token);
+        headers.append("X-Host", host);
+        fetch("https://fileservice.myportofolio.eu/api/Files/Send", {
+            method: "POST",
+            body: formData,
+            headers: headers,
+        });
+    }
+
+    window.UploadFileFormWithPromise = function (token, host, maxSize) {
+        var url = "https://fileservice.myportofolio.eu/api/Files/";
+        var formData = new FormData(document.getElementById("uploadFileForm"));
+        var btn = document.getElementById("uploadFileButton");
+        if (formData && btn) {
+            var selectedFileSize = formData.get("file").size;
+            if (selectedFileSize > maxSize) {
+                alert("File size exceeds the maximum allowed size.");
+                btn.click();
+            } else {
+                var headers = new Headers();
+                headers.append("Authorization", token);
+                headers.append("X-Host", host);
+                fetch(url, {
+                    method: "POST",
+                    body: formData,
+                    headers: headers,
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    var input = document.getElementById("fileUrl");
+                    
+                    if (input && data) {
+                        input.value = url + data;
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        btn.click();
+                    }
+                });
+            }
+        }
+    }
+</script>
+
+<component type="typeof(App)" render-mode="ServerPrerendered" />

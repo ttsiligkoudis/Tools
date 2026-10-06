@@ -1,0 +1,23 @@
+﻿@page "/video-downloader"
+
+<h3 class="d-lg-none mb-4">Video Downloader</h3>
+
+<p>Enter the URL of the video:</p>
+<input type="text" @bind="videoUrl" class="form-control" />
+<button @onclick="DownloadVideo" class="btn btn-primary" disabled="@isDownloading">Download Video</button>
+
+@if (!string.IsNullOrWhiteSpace(downloadStatus))
+{
+    <p>@downloadStatus</p>
+}
+
+@if (isDownloading)
+{
+    <div class="progress" style="height: 30px">
+        <div class="progress-bar" style="width: @downloadProgressString;" role="progressbar" aria-valuenow="@downloadProgressString" aria-valuemin="0" aria-valuemax="100">@downloadProgressString</div>
+    </div>
+}
+
+@code {
+
+}

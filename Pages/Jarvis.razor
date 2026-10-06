@@ -1,0 +1,60 @@
+@page "/jarvis"
+@using ToolsServer.Services.Jarvis
+@inject JarvisSession Session
+@inject NavigationManager Nav
+
+<PageTitle>J.A.R.V.I.S.</PageTitle>
+
+<h2>J.A.R.V.I.S. Assistant</h2>
+<div class="jarvis-chat border rounded p-3 mb-3" style="max-width:800px;">
+    @foreach (var msg in Session.History.Where(m => m.Role != "tool"))
+    {
+        <div class="mb-2">
+            <strong>@(msg.Role == "user" ? "You" : "J.A.R.V.I.S."):</strong>
+            <div>@msg.Content</div>
+        </div>
+    }
+    @if (IsThinking)
+    {
+        <div><em>J.A.R.V.I.S. is thinking...</em></div>
+    }
+</div>
+
+<form @onsubmit="SendAsync" style="max-width:800px;">
+    <div class="input-group mb-3">
+        <input class="form-control" @bind="UserInput" placeholder="Ask J.A.R.V.I.S. anything..." />
+        <button class="btn btn-primary" disabled="@IsThinking">Send</button>
+    </div>
+</form>
+
+<p class="text-muted" style="max-width:800px;">The assistant can fetch Hacker News top stories automatically when you ask for tech/startup/news.</p>
+
+@code {
+    private string UserInput = string.Empty;
+    private bool IsThinking;
+
+    protected override void OnInitialized()
+    {
+        if (Layout != null) Layout.Title = "J.A.R.V.I.S.";
+    }
+
+    [CascadingParameter] public MainLayout? Layout { get; set; }
+
+    private async Task SendAsync()
+    {
+        if (string.IsNullOrWhiteSpace(UserInput)) return;
+        var text = UserInput.Trim();
+        UserInput = string.Empty;
+        Session.History.Add(new JarvisMessage("user", text));
+        IsThinking = true;
+        try
+        {
+            var result = await Session.RespondAsync();
+            Session.History.Add(new JarvisMessage("assistant", result.AssistantReply));
+        }
+        finally
+        {
+            IsThinking = false;
+        }
+    }
+}

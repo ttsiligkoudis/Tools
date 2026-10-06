@@ -1,0 +1,86 @@
+﻿@page "/file-transfer"
+
+<h3 class="d-lg-none mb-4">File Transfer</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @errorMessage
+    </div>
+}
+
+@if (success)
+{
+    <div class="alert alert-success" role="alert">
+        The upload process is started and an email will be sent with a download link as soon as the process is finished.
+    </div>
+}
+
+<div class="container card shadow card-body">
+    <form @onsubmit="SubmitForm" id="uploadFileForm" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="email" class="required form-label">Email Address</label>
+            <input id="email" name="email" type="email" class="form-control" @bind="email" required />
+        </div>
+        <div class="mb-3">
+            <label for="title" class="required form-label">Title</label>
+            <input id="title" name="title" type="text" class="form-control" @bind="title" required />
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label">Message</label>
+            <textarea id="message" name="message" class="form-control" @bind="message"></textarea>
+        </div>
+
+        <div>
+            @* <input type="file" name="files" id="inputFile" multiple hidden required /> *@
+            <InputFile OnChange="HandleFileSelection" id="inputFile" multiple hidden required />
+            <button type="button" class="btn btn-link custom-btn" @onclick="OpenInputFile">
+                <i class="fa-solid fa-circle-plus fa-xl"></i> Add Files
+            </button> 
+            <i class="fw-lighter">@(Math.Round((double)(maxAllowedSize - files.Sum(s => s.Size)) / (1000 * 1024 * 1024), 3)) GB remaining</i>
+        </div>
+
+        @if (files.Any())
+        {
+            <hr class="my-4">
+
+            <div>
+                @foreach (var file in files)
+                {
+                    <div class="row mb-1">
+                        <div class="col-10">
+                            @if (!string.IsNullOrEmpty(file.Name))
+                            {
+                                <i class="fw-light">
+                                    @(file.Name.Length > 50
+                                        ? Path.GetFileNameWithoutExtension(file.Name).Substring(0, 50) + Path.GetExtension(file.Name)
+                                        : file.Name)
+                                </i>
+                            }
+                        </div>
+                        <div class="col-2">
+                            <div class="float-end">
+                                <button type="button" class="d-block btn btn-danger btn-sm" @onclick="() => files.Remove(file)">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @* <button type="submit" class="btn btn-primary @(files.Any() ? "" : "disabled") mt-4">Transfer</button> *@
+        <button type="submit" class="btn btn-primary mt-4">Transfer</button>
+    </form>
+</div>
+
+@if (isLoading)
+{
+    <div class="loader-overlay d-flex">
+        <div class="blur-background"></div>
+        <div class="loader spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}

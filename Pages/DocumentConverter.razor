@@ -1,0 +1,33 @@
+﻿@page "/document-converter"
+<h3 class="d-lg-none mb-4">Document Converter</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @errorMessage
+    </div>
+}
+
+<div class="container card shadow card-body">
+    <div class="row">
+        <div class="col-md-5 mb-3">
+            <label>Select File</label>
+            <InputFile OnChange="HandleFileSelected" accept=".pdf, .doc, .docx" maxFileSize="@maxAllowedSize" class="form-control" />
+        </div>
+        <div class="col-md-5">
+            <label>Target Document Type</label>
+            <select class="form-select" @bind="targetDocumentType">
+                @foreach (var documentType in Enum.GetValues(typeof(DocumentType)).Cast<DocumentType>())
+                {
+                    <option value="@documentType">@documentType</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="float-end">
+                <label></label>
+                <button @onclick="ConvertButtonClicked" disabled="@(isLoading || file == null)" class="d-block btn btn-primary">Convert</button>
+            </div>
+        </div>
+    </div>
+</div>

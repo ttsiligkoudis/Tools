@@ -1,0 +1,186 @@
+﻿@page "/qr-code-generator"
+
+<h3 class="d-lg-none mb-4">QR Code Generator</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger mt-3" role="alert">
+        @errorMessage
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8 mb-3">
+        <div class="container card shadow card-body">
+            <div class="mb-3">
+                <ul class="nav nav-pills">
+                    @foreach (QrCodeType type in Enum.GetValues(typeof(QrCodeType)))
+                    {
+                        <li class="nav-item">
+                            <button class="nav-link @(type == qrCodeType ? "active" : "")" type="button" @onclick="() =>{ qrCodeType = type; ResetFields(); }">@type</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            @if (qrCodeType == QrCodeType.LINK)
+            {
+                <div class="mb-2">
+                    <label>Link URL</label>
+                    <input class="form-control" type="url" placeholder="https://example.com" @bind="customText1" @bind:event="oninput" />
+                </div>
+
+                <div>
+                    <label></label>
+                    <button class="d-block btn btn-primary" @onclick="GenerateButtonClicked">Generate QR Code</button>
+                </div>
+            } 
+            else if (qrCodeType == QrCodeType.TEXT)
+            {
+                <div class="mb-2">
+                    <label>Text</label>
+                    <input class="form-control" type="text" @bind="customText1" @bind:event="oninput" />
+                </div>
+
+                <div>
+                    <label></label>
+                    <button class="d-block btn btn-primary" @onclick="GenerateButtonClicked">Generate QR Code</button>
+                </div>
+            } 
+            else if (qrCodeType == QrCodeType.WIFI)
+            {
+                <div class="mb-2">
+                    <label>Network Name</label>
+                    <input class="form-control" type="text" @bind="customText1" @bind:event="oninput" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Password</label>
+                    <input class="form-control" type="text" @bind="customText2" @bind:event="oninput" />
+                </div>
+
+                <div class="mb-2">
+                    <label>Encryption</label>
+                    <select class="form-select" @bind="wifiEncryption">
+                        @foreach (WifiEncryption encryption in Enum.GetValues(typeof(WifiEncryption)))
+                        {
+                            <option Value="@encryption">@(encryption == WifiEncryption.WPA ? "WPA/WPA2" : encryption)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" @bind="@customCheck1" />
+                    <label>Hidden</label>
+                </div>
+
+                <div>
+                    <label></label>
+                    <button class="d-block btn btn-primary" @onclick="GenerateButtonClicked">Generate QR Code</button>
+                </div>
+            }
+            else if (qrCodeType == QrCodeType.FILE)
+            {
+                <div class="mb-2">
+                    <label>Upload File</label>
+                   @*  <button id="uploadFileButton" @onclick="GenerateButtonClicked" hidden />
+                    <input type="text" @bind="customText1" @bind:event="oninput" id="fileUrl" hidden />
+                    <form id="uploadFileForm" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" @onchange="HandleFileUpload" maxFileSize="@maxAllowedSize" class="form-control" />
+                    </form> *@
+                    <InputFile OnChange="HandleFileUpload" maxFileSize="@maxAllowedSize" class="form-control" />
+                </div>
+            }
+            else if (qrCodeType == QrCodeType.PROFILE)
+            {
+                <div class="mb-2">
+                    <label>Name</label>
+                    <input class="form-control" type="text" @bind="customText1" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Phone Number</label>
+                    <input class="form-control" type="text" @bind="customText2" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Email</label>
+                    <input class="form-control" type="text" @bind="customText3" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Address</label>
+                    <input class="form-control" type="text" @bind="customText4" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>City</label>
+                    <input class="form-control" type="text" @bind="customText5" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Post Code</label>
+                    <input class="form-control" type="text" @bind="customText6" @bind:event="oninput" />
+                </div>                    <div class="mb-2">
+                    <label>Country</label>
+                    <input class="form-control" type="text" @bind="customText7" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Company</label>
+                    <input class="form-control" type="text" @bind="customText8" @bind:event="oninput" />
+                </div>                    
+                <div class="mb-2">
+                    <label>Job Title</label>
+                    <input class="form-control" type="text" @bind="customText9" @bind:event="oninput" />
+                </div>                    
+                <div class="mb-2">
+                    <label>WebSite</label>
+                    <input class="form-control" type="text" @bind="customText10" @bind:event="oninput" />
+                </div>
+                <div>
+                    <label></label>
+                    <button class="d-block btn btn-primary" @onclick="GenerateButtonClicked">Generate QR Code</button>
+                </div>
+            }
+            else if (qrCodeType == QrCodeType.VCARD)
+            {
+                <div class="mb-2">
+                    <label>Name</label>
+                    <input class="form-control" type="text" @bind="customText1" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Phone Number</label>
+                    <input class="form-control" type="text" @bind="customText2" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Email</label>
+                    <input class="form-control" type="text" @bind="customText3" @bind:event="oninput" />
+                </div>
+                <div class="mb-2">
+                    <label>Company</label>
+                    <input class="form-control" type="text" @bind="customText4" @bind:event="oninput" />
+                </div>   
+                <div>
+                    <label></label>
+                    <button class="d-block btn btn-primary" @onclick="GenerateButtonClicked">Generate QR Code</button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="container card shadow card-body text-center">
+            <div>
+                <img class="img-fluid" src="@(data == null ? "/emptyImage.jpg" : $"data:image/png;base64,{Convert.ToBase64String(data)}")" alt="" />
+            </div>
+            <div>
+                <button class="btn @(data == null ? "btn-secondary disabled" : "btn-outline-success")" @onclick="DownloadButtonClicked">Download Image</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="loader-overlay d-flex">
+        <div class="blur-background"></div>
+        <div class="loader spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}

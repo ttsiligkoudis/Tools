@@ -1,0 +1,15 @@
+## .NET
+bin/
+obj/
+*.user
+
+## Visual Studio
+.vs/
+
+## Downloads output folder (runtime-generated)
+wwwroot/downloads/*
+!wwwroot/downloads/.gitkeep
+
+## OS
+.DS_Store
+Thumbs.db

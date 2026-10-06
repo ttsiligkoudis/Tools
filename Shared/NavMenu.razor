@@ -1,0 +1,74 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Tools</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span aria-hidden="true"><i class="fas fa-home fa-xl me-3"></i>Home</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="jarvis">
+                <span aria-hidden="true"><i class="fas fa-robot fa-xl me-3"></i>J.A.R.V.I.S.</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="word-character-counter">
+                <span aria-hidden="true"><i class="fas fa-text-width fa-xl me-3"></i>Word/Character Counter</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="youtube-downloader">
+                <span aria-hidden="true"><i class="fa-brands fa-youtube fa-xl me-3"></i>Youtube Downloader</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="image-resizer">
+                <span aria-hidden="true"><i class="fas fa-image fa-xl me-3"></i>Image Resizer</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="currency-converter">
+                <span aria-hidden="true"><i class="fas fa-dollar-sign fa-xl me-3"></i>Currency Converter</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="qr-code-generator">
+                <span aria-hidden="true"><i class="fas fa-qrcode fa-xl me-3"></i>QR Code Generator</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="file-transfer">
+                <span aria-hidden="true"><i class="fas fa-file-upload fa-xl me-3"></i>File Transfer</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="document-converter">
+                <span aria-hidden="true"><i class="fa-regular fa-file-lines fa-xl me-3"></i>Document Converter</span>
+            </NavLink>
+        </div>
+        <div class="nav-item">
+            <NavLink class="nav-link" href="weather">
+                <span aria-hidden="true"><i class="fas fa-cloud-sun fa-xl me-3"></i>Weather</span>
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

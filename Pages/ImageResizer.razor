@@ -1,0 +1,55 @@
+﻿@page "/image-resizer"
+
+<h3 class="d-lg-none mb-4">Image Resizer</h3>
+
+<div class="container card shadow card-body">
+    <EditForm Model="Model" OnSubmit="ResizeImage">
+        <div class="mb-3">
+            <label class="form-label">Select Image</label>
+            <InputFile OnChange="HandleFileSelected" maxFileSize="@Model.MaxAllowedSize" class="form-control" />
+        </div>
+        <div class="mb-3 row">
+            <label class="col-md-4">Resize Method:</label>
+            <InputRadioGroup @bind-Value="Model.Type">
+                <div class="col-md-4 form-check">
+                    <InputRadio Value="ResizeType.Percentage" class="form-check-input" />
+                    <label class="form-check-label">By Percentage (%)</label>
+                </div>
+                <div class="col-md-4 form-check">
+                    <InputRadio Value="ResizeType.Dimensions" class="form-check-input" />
+                    <label class="form-check-label">By Dimensions (px)</label>
+                </div>
+            </InputRadioGroup>
+        </div>
+        @if (Model.Type == ResizeType.Percentage)
+        {
+            <div class="mb-3">
+                <label class="form-label">Percentage</label>
+                <input type="number" class="form-control" @bind="Model.Percentage" min="1" max="100" />
+            </div>
+        }
+        else if (Model.Type == ResizeType.Dimensions)
+        {
+            <div class="row align-items-center mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Width</label>
+                    <input type="number" class="form-control" min="1" value="@Model.Width" @oninput="WidthOnInput" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Height</label>
+                    <input type="number" class="form-control" min="1" value="@Model.Height" @oninput="HeightOnInput" />
+                </div>
+                <div class="col-md-4">
+                    <label></label>
+                    <div class="form-switch">
+                        <input type="checkbox" class="form-check-input" @bind="Model.KeepAspectRatio" />
+                        <label class="form-check-label">Keep aspect ratio</label>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="d-grid">
+            <button type="submit" disabled="@(Model.Image == null)" class="btn btn-primary">Resize Image</button>
+        </div>
+    </EditForm>
+</div>

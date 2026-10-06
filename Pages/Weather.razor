@@ -1,0 +1,123 @@
+@page "/weather"
+<h3 class="d-lg-none mb-4">Weather</h3>
+
+<div class="container-fluid card shadow card-body">
+    <div class="row g-3 mb-3 position-relative">
+        <div class="col-lg-5 col-md-7 position-relative" style="z-index:100;">
+            <label class="form-label" for="cityInput">City</label>
+            <input id="cityInput" class="form-control" value="@cityQuery" @oninput="OnCityInput" placeholder="Type at least 3 characters" autocomplete="off" />
+            @if (showSuggestions && suggestionResults?.Any() == true)
+            {
+                <div class="list-group shadow position-absolute w-100 suggestion-dropdown">
+                    @foreach (var s in suggestionResults)
+                    {
+                        <button type="button" class="list-group-item list-group-item-action" @onclick="() => SelectSuggestion(s)">
+                            @s.DisplayName
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+        <div class="col-lg-3 col-md-4 col-6">
+            <label class="form-label d-block">Units</label>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-@(useFahrenheit?"secondary":"primary")" @onclick="() => ChangeUnits(false)">Celsius</button>
+                <button class="btn btn-sm btn-@(useFahrenheit?"primary":"secondary")" @onclick="() => ChangeUnits(true)">Fahrenheit</button>
+            </div>
+        </div>
+        <div class="col-lg col-md-2 col-6 align-self-end d-flex justify-content-end">
+            <button class="btn btn-primary" disabled="@(!canSearchExplicit)" @onclick="ExplicitSearch">Search</button>
+        </div>
+    </div>
+
+    @if (groupedDailyForecast?.Any() == true)
+    {
+        <div class="forecast-table">
+            @foreach (var day in groupedDailyForecast)
+            {
+                <div class="day-header px-3 py-2 mt-3 mb-2 bg-light border rounded d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                    <div>
+                        <span class="fw-bold">@day.Key.ToString("dddd dd MMMM")</span>
+                    </div>
+                    @if (dailySunData.TryGetValue(day.Key.Date, out var sun))
+                    {
+                        <div class="small text-muted mt-1 mt-sm-0">Sunrise: @sun.Sunrise.ToString("HH:mm") - Sunset: @sun.Sunset.ToString("HH:mm")</div>
+                    }
+                </div>
+                @foreach (var hour in day.Value)
+                {
+                    <div class="row g-0 py-2 align-items-center border-bottom hourly-row mx-0 px-2 px-sm-3 flex-wrap">
+                        <div class="col-3 col-sm-1 text-center mb-2 mb-sm-0">
+                            <span class="badge bg-dark w-50">@hour.Time.ToString("HH:mm")</span>
+                        </div>
+                        <div class="col-9 col-sm-2 px-2 mb-2 mb-sm-0 small">
+                            <div class="fw-semibold">@hour.Temperature.ToString("0.#")°@(useFahrenheit?"F":"C")</div>
+                            <div class="text-muted">Feels @hour.FeelsLike.ToString("0.#")°</div>
+                        </div>
+                        <div class="col-6 col-sm-2 small px-2 mb-2 mb-sm-0">
+                            <div>@hour.Humidity%</div>
+                            <div>
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    var filled = i < hour.HumidityBucket;
+                                    <i class="fa-solid fa-droplet me-1 @(filled?"text-primary":"text-secondary opacity-25")"></i>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-2 small px-2 mb-2 mb-sm-0">
+                            <div>@hour.WindSpeed.ToString("0.#") m/s</div>
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-location-arrow me-1" style="transform:rotate(@hour.WindDirectiondeg);"></i>
+                                <span>@hour.WindDirectionText</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-2 small px-2 mb-2 mb-sm-0 text-center">
+                            <div>@hour.Description</div>
+                            <div><i class="@hour.IconClass fa-lg"></i></div>
+                        </div>
+                        <div class="col-6 col-sm-1 small px-2 mb-2 mb-sm-0 text-center">
+                            <span title="Precipitation Probability"><i class="fa-solid fa-cloud-rain"></i><br />@hour.PrecipProbability%</span>
+                        </div>
+                        <div class="col-12 col-sm-2 small px-2">
+                            <div class="progress" style="height:6px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width:@hour.PrecipProbability%"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@if (isLoading)
+{
+    <div class="loader-overlay d-flex">
+        <div class="blur-background"></div>
+        <div class="loader spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+
+<style>
+    .forecast-table .hourly-row:hover { background:#f8f9fa; }
+    .suggestion-dropdown { max-height: 300px; overflow-y:auto; top: 100%; left:0; }
+</style>
+<style media="(max-width: 576px)">
+    .hourly-row { font-size: .75rem; }
+    .hourly-row .badge { font-size:.6rem; }
+    .hourly-row i.fa-droplet { font-size:.65rem; }
+</style>
+
+<script>
+    window.weather = window.weather || {};
+    weather.getLocation = async () => {
+        if (!navigator.geolocation) return null;
+        return new Promise(r => {
+            navigator.geolocation.getCurrentPosition(p => {
+                r({ latitude: p.coords.latitude, longitude: p.coords.longitude });
+            }, _ => r(null), { enableHighAccuracy: true, timeout: 8000 });
+        });
+    }
+</script>
